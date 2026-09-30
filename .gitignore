@@ -1,0 +1,23 @@
+# ─── Dependencies ────────────────────────────────────────────────────────────
+node_modules/
+
+# ─── Environment Variables ───────────────────────────────────────────────────
+# IMPORTANT: Never commit .env files — they contain secrets like DB passwords
+# and API keys. Use .env.example as a safe template instead.
+.env
+.env.local
+.env.production
+
+# ─── Build Output ────────────────────────────────────────────────────────────
+client/dist/
+client/build/
+
+# ─── Logs ────────────────────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+
+# ─── OS / Editor Files ───────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/settings.json
