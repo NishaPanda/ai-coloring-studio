@@ -1,11 +1,15 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import connectDB from './config/db.js';
 import testRoutes from './routes/testRoutes.js';
 import { errorHandler } from './middleware/errorMiddleware.js';
 
 // Load environment variables from .env file
 dotenv.config();
+
+// Connect to MongoDB Atlas before starting the server
+connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
