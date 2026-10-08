@@ -1,30 +1,30 @@
-import { useState, useEffect } from 'react';
-import api from './services/api';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Home from './pages/Home';
+import Browse from './pages/Browse';
+import Studio from './pages/Studio';
+import Gallery from './pages/Gallery';
+import Login from './pages/Login';
+import Register from './pages/Register';
 import './index.css';
 
-// App.jsx — Root component
-//
-// For now this is a simple connection test page.
-// In Phase 2, we will replace this with proper routing and pages.
-
 function App() {
-  const [apiStatus, setApiStatus] = useState('Checking connection...');
-
-  useEffect(() => {
-    // Call the test route on the backend to verify communication
-    api.get('/test')
-      .then((res) => setApiStatus(res.data.message))
-      .catch(() => setApiStatus('❌ Could not connect to the backend. Is the server running?'));
-  }, []);
-
   return (
-    <div style={{ fontFamily: 'sans-serif', textAlign: 'center', padding: '4rem' }}>
-      <h1>🎨 AI Coloring Studio</h1>
-      <p>Phase 1 — Setup Check</p>
-      <hr />
-      <p><strong>Backend API status:</strong></p>
-      <p>{apiStatus}</p>
-    </div>
+    <Router>
+      <div className="app-container">
+        <Navbar />
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/browse" element={<Browse />} />
+            <Route path="/studio/:id" element={<Studio />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
   );
 }
 
