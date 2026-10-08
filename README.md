@@ -76,6 +76,29 @@ npm run dev
 
 ---
 
+## 📌 Project Progress
+
+✅ Phase 1 — Project Setup
+
+✅ Phase 2 — Basic Application Structure
+
+✅ Phase 3 — Authentication
+
+⬜ Phase 4 — Interactive Coloring Studio
+
+⬜ Phase 5 — Coloring Pages & Browse
+
+⬜ Phase 6 — Artwork & Gallery
+
+⬜ Phase 7 — AI Color Suggestions
+
+⬜ Phase 8 — Testing
+
+⬜ Phase 9 — CI/CD
+
+⬜ Phase 10 — Deployment
+
+
 ## License
 
 MIT
