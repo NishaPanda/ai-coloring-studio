@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import testRoutes from './routes/testRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 import { errorHandler } from './middleware/errorMiddleware.js';
 
 // Load environment variables from .env file
@@ -26,6 +27,9 @@ app.use(cors({
 app.use(express.json());
 
 // ─── Routes ──────────────────────────────────────────────────────────────────
+
+// Authentication routes
+app.use('/api/auth', authRoutes);
 
 // A simple test route to confirm the API is running
 app.use('/api', testRoutes);
