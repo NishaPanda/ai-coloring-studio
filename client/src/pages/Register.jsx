@@ -76,9 +76,8 @@ const Register = () => {
           {loading ? 'Registering...' : 'Register'}
         </button>
       </form>
-      
       <div style={{ marginTop: '1.5rem' }}>
-        <Link to="/login" style={{ color: '#007bff' }}>Already have an account? Login here.</Link>
+        <Link to="/login" style={{ color: '#007bff' }}>Already have an account? Login</Link>
       </div>
     </div>
   );

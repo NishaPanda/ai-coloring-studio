@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useContext } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
+import { AuthContext } from '../context/AuthContext';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +11,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
+  const { loginUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -23,10 +25,8 @@ const Login = () => {
 
     try {
       const response = await api.post('/auth/login', formData);
-      // Store token
-      localStorage.setItem('token', response.data.token);
-      // Store basic user info if needed
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      // Update global auth state and localStorage
+      loginUser(response.data.user, response.data.token);
       // Redirect to home
       navigate('/');
     } catch (err) {
@@ -70,6 +70,10 @@ const Login = () => {
           {loading ? 'Logging in...' : 'Login'}
         </button>
       </form>
+      
+      <div style={{ marginTop: '1.5rem' }}>
+        <Link to="/register" style={{ color: '#007bff' }}>Don't have an account? Register</Link>
+      </div>
     </div>
   );
 };
