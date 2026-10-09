@@ -1,0 +1,183 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 400 500"
+  width="400"
+  height="500"
+  role="img"
+  aria-label="Cat coloring page"
+>
+  <!-- ============================================================
+       AI Coloring Studio – Sample Coloring Page: Sitting Cat
+       Each region has a stable id so Phase 4B can target it
+       for click-to-fill color.
+
+       Region IDs:
+         cat-body        – main body torso
+         cat-head        – head circle
+         cat-ear-left    – left ear triangle
+         cat-ear-right   – right ear triangle
+         cat-face-left   – left cheek / face half
+         cat-face-right  – right cheek / face half
+         cat-eye-left    – left eye
+         cat-eye-right   – right eye
+         cat-nose        – nose
+         cat-mouth-left  – left mouth curve
+         cat-mouth-right – right mouth curve
+         cat-tail        – tail shape
+         cat-belly       – belly patch
+         cat-paw-left    – left front paw
+         cat-paw-right   – right front paw
+       ============================================================ -->
+
+  <style>
+    /* All regions start white so they look like a coloring book page.
+       In Phase 4B, JS will update the fill of the clicked region. */
+    .region {
+      fill: #ffffff;
+      stroke: #1a1a1a;
+      stroke-width: 3;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+      cursor: default;   /* Phase 4B will change to pointer */
+    }
+    /* Decorative lines that are NOT independent regions */
+    .detail-line {
+      fill: none;
+      stroke: #1a1a1a;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+    }
+    /* Filled-black parts (pupils, whisker dots) */
+    .filled-black {
+      fill: #1a1a1a;
+      stroke: none;
+    }
+  </style>
+
+  <!-- ── Tail (drawn first so body sits on top) ── -->
+  <path
+    id="cat-tail"
+    class="region"
+    d="M 230 380
+       C 300 370, 340 320, 320 270
+       C 310 250, 290 255, 285 275
+       C 295 305, 265 340, 215 350
+       Z"
+  />
+
+  <!-- ── Body ── -->
+  <ellipse
+    id="cat-body"
+    class="region"
+    cx="200" cy="360"
+    rx="100" ry="110"
+  />
+
+  <!-- ── Belly patch ── -->
+  <ellipse
+    id="cat-belly"
+    class="region"
+    cx="200" cy="375"
+    rx="52" ry="68"
+  />
+
+  <!-- ── Left front paw ── -->
+  <ellipse
+    id="cat-paw-left"
+    class="region"
+    cx="145" cy="455"
+    rx="32" ry="18"
+  />
+
+  <!-- ── Right front paw ── -->
+  <ellipse
+    id="cat-paw-right"
+    class="region"
+    cx="255" cy="455"
+    rx="32" ry="18"
+  />
+
+  <!-- ── Left ear (behind head) ── -->
+  <polygon
+    id="cat-ear-left"
+    class="region"
+    points="130,185 110,120 170,165"
+  />
+
+  <!-- ── Right ear (behind head) ── -->
+  <polygon
+    id="cat-ear-right"
+    class="region"
+    points="270,185 290,120 230,165"
+  />
+
+  <!-- ── Head ── -->
+  <circle
+    id="cat-head"
+    class="region"
+    cx="200" cy="210"
+    r="90"
+  />
+
+  <!-- ── Left eye white ── -->
+  <ellipse
+    id="cat-eye-left"
+    class="region"
+    cx="168" cy="200"
+    rx="18" ry="20"
+  />
+
+  <!-- ── Right eye white ── -->
+  <ellipse
+    id="cat-eye-right"
+    class="region"
+    cx="232" cy="200"
+    rx="18" ry="20"
+  />
+
+  <!-- ── Pupils (not interactive regions) ── -->
+  <ellipse class="filled-black" cx="170" cy="202" rx="9" ry="13" />
+  <ellipse class="filled-black" cx="234" cy="202" rx="9" ry="13" />
+
+  <!-- ── Eye shine dots ── -->
+  <circle class="filled-black" style="fill:#fff" cx="174" cy="197" r="3" />
+  <circle class="filled-black" style="fill:#fff" cx="238" cy="197" r="3" />
+
+  <!-- ── Nose ── -->
+  <polygon
+    id="cat-nose"
+    class="region"
+    points="200,238 192,250 208,250"
+  />
+
+  <!-- ── Mouth curves (detail lines, not fill regions) ── -->
+  <path class="detail-line" d="M 192 250 Q 185 262 178 260" />
+  <path class="detail-line" d="M 208 250 Q 215 262 222 260" />
+
+  <!-- ── Whiskers left ── -->
+  <line class="detail-line" x1="155" y1="248" x2="115" y2="240" />
+  <line class="detail-line" x1="155" y1="256" x2="112" y2="258" />
+  <line class="detail-line" x1="155" y1="264" x2="118" y2="272" />
+
+  <!-- ── Whiskers right ── -->
+  <line class="detail-line" x1="245" y1="248" x2="285" y2="240" />
+  <line class="detail-line" x1="245" y1="256" x2="288" y2="258" />
+  <line class="detail-line" x1="245" y1="264" x2="282" y2="272" />
+
+  <!-- ── Inner ear lines ── -->
+  <line class="detail-line" x1="128" y1="175" x2="148" y2="145" />
+  <line class="detail-line" x1="148" y1="145" x2="163" y2="168" />
+  <line class="detail-line" x1="272" y1="175" x2="252" y2="145" />
+  <line class="detail-line" x1="252" y1="145" x2="237" y2="168" />
+
+  <!-- ── Paw toe lines left ── -->
+  <line class="detail-line" x1="130" y1="450" x2="130" y2="462" />
+  <line class="detail-line" x1="145" y1="448" x2="145" y2="462" />
+  <line class="detail-line" x1="160" y1="450" x2="160" y2="462" />
+
+  <!-- ── Paw toe lines right ── -->
+  <line class="detail-line" x1="240" y1="450" x2="240" y2="462" />
+  <line class="detail-line" x1="255" y1="448" x2="255" y2="462" />
+  <line class="detail-line" x1="270" y1="450" x2="270" y2="462" />
+
+</svg>

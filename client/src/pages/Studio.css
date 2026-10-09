@@ -1,0 +1,342 @@
+/* ─── Studio.css ───────────────────────────────────────────────────────────────
+   Styles for the Phase 4C coloring workspace.
+   Updated: eraser · undo · redo · reset toolbar buttons + active-tool indicator.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* ── Page wrapper ── */
+.studio-page {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 60px); /* subtract navbar height */
+  background-color: #f0f4f8;
+  padding: 1.5rem 1.5rem 2rem;
+}
+
+/* ── Top bar: heading + back link ── */
+.studio-header {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.studio-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  color: #555;
+  text-decoration: none;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+  white-space: nowrap;
+}
+
+.studio-back-link:hover {
+  background: #e8f0fe;
+  color: #3b5bdb;
+  border-color: #a5b4fc;
+}
+
+.studio-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1e2a3a;
+  margin: 0;
+}
+
+/* ── Main body: toolbar + canvas side-by-side on desktop ── */
+.studio-body {
+  display: flex;
+  flex: 1;
+  gap: 1.25rem;
+}
+
+/* ── Left toolbar panel ── */
+.studio-toolbar {
+  width: 190px;
+  flex-shrink: 0;
+  background: #ffffff;
+  border: 1px solid #dde3ea;
+  border-radius: 12px;
+  padding: 1rem 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.studio-toolbar-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #888;
+  margin: 0;
+}
+
+/* ── Color picker section ── */
+.tool-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tool-section-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #555;
+}
+
+/* Color swatch + native input stacked */
+.color-picker-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+/* The large color swatch preview box */
+.color-swatch-preview {
+  width: 100%;
+  height: 48px;
+  border-radius: 8px;
+  border: 2px solid #dde3ea;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  transition: border-color 0.15s;
+  cursor: pointer;
+}
+
+/* The row that holds the native <input type="color"> + hex label */
+.color-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+/* Native color wheel input – styled to look like a small button */
+.color-native-input {
+  width: 36px;
+  height: 36px;
+  padding: 2px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Hex code text display */
+.color-hex-label {
+  font-size: 0.82rem;
+  font-family: 'Courier New', Courier, monospace;
+  color: #444;
+  letter-spacing: 0.04em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Active-color indicator strip ── */
+.active-color-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #e0e7ef;
+  background: #f7f9fc;
+  font-size: 0.78rem;
+  color: #555;
+}
+
+.active-color-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0,0,0,0.15);
+  flex-shrink: 0;
+  transition: background-color 0.12s;
+}
+
+/* ── Tool button group (Fill / Eraser pair, Undo / Redo pair) ── */
+.tool-btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* ── Base tool button ── */
+.tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  font-size: 0.83rem;
+  font-weight: 500;
+  color: #444;
+  background: #f4f6f9;
+  border: 1.5px solid #dde3ea;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.15s;
+  text-align: left;
+}
+
+.tool-btn:hover:not(:disabled) {
+  background: #e8f0fe;
+  border-color: #a5b4fc;
+  color: #3b5bdb;
+}
+
+.tool-btn .tool-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* ── Active fill tool ── */
+.tool-btn--active {
+  background: #e8f0fe;
+  border-color: #3b5bdb;
+  color: #3b5bdb;
+  font-weight: 700;
+}
+
+/* ── Active eraser tool ── */
+.tool-btn--eraser-active {
+  background: #fff3cd;
+  border-color: #e0a800;
+  color: #856404;
+  font-weight: 700;
+}
+
+/* ── Eraser cursor on SVG regions ── */
+.studio-svg-wrapper svg .region--eraser {
+  cursor: cell;
+}
+
+/* ── Action buttons (Undo / Redo) ── */
+.tool-btn--action:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Reset button ── */
+.tool-btn--reset {
+  color: #c0392b;
+  border-color: #f5c6cb;
+  background: #fff5f5;
+}
+
+.tool-btn--reset:hover:not(:disabled) {
+  background: #fde8e8;
+  border-color: #c0392b;
+  color: #9b1c1c;
+}
+
+/* ── Divider ── */
+.toolbar-divider {
+  border: none;
+  border-top: 1px solid #eef1f5;
+  margin: 0;
+}
+
+/* ── Workspace / canvas panel ── */
+.studio-workspace {
+  flex: 1;
+  background: #ffffff;
+  border: 1px solid #dde3ea;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  min-height: 480px;
+  position: relative;
+  overflow: hidden;
+}
+
+.studio-canvas-label {
+  position: absolute;
+  top: 1rem;
+  left: 1.25rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #bbb;
+}
+
+/* SVG wrapper – constrains SVG to a comfortable size */
+.studio-svg-wrapper {
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 4 / 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Inline SVG fill the wrapper exactly */
+.studio-svg-wrapper svg {
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+  display: block;
+}
+
+/* ── Interactive SVG region hover effect ── */
+/*
+ * .region elements inside the SVG will get pointer cursor and a subtle
+ * hover highlight. Stroke is kept on the SVG elements themselves via
+ * inline style / SVG attributes so outlines always stay visible.
+ */
+.studio-svg-wrapper svg .region {
+  cursor: crosshair;
+  transition: filter 0.12s;
+}
+
+.studio-svg-wrapper svg .region:hover {
+  filter: brightness(0.9);
+}
+
+/* ── Responsive: stack toolbar below workspace on mobile ── */
+@media (max-width: 640px) {
+  .studio-body {
+    flex-direction: column;
+  }
+
+  .studio-toolbar {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .studio-toolbar-title {
+    width: 100%;
+  }
+
+  .tool-section {
+    flex: 1 1 140px;
+  }
+
+  .active-color-strip {
+    flex: 1 1 140px;
+  }
+
+  .studio-title {
+    font-size: 1.3rem;
+  }
+}
