@@ -1,0 +1,52 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 400 500"
+  width="400"
+  height="500"
+  role="img"
+  aria-label="Garden flower coloring page"
+>
+  <!--
+    Region IDs:
+      flower-petal-1 … flower-petal-8  – eight petals
+      flower-center                     – center circle
+      flower-stem                       – vertical stem
+      flower-leaf-left / flower-leaf-right
+  -->
+  <style>
+    .region { fill:#ffffff; stroke:#1a1a1a; stroke-width:3; stroke-linejoin:round; stroke-linecap:round; }
+    .detail-line { fill:none; stroke:#1a1a1a; stroke-width:2.5; stroke-linecap:round; }
+  </style>
+
+  <!-- 8 petals – each ellipse rotated every 45° around the flower centre (200,218) -->
+  <ellipse id="flower-petal-1" class="region" cx="200" cy="142" rx="29" ry="68" transform="rotate(0 200 218)" />
+  <ellipse id="flower-petal-2" class="region" cx="200" cy="142" rx="29" ry="68" transform="rotate(45 200 218)" />
+  <ellipse id="flower-petal-3" class="region" cx="200" cy="142" rx="29" ry="68" transform="rotate(90 200 218)" />
+  <ellipse id="flower-petal-4" class="region" cx="200" cy="142" rx="29" ry="68" transform="rotate(135 200 218)" />
+  <ellipse id="flower-petal-5" class="region" cx="200" cy="142" rx="29" ry="68" transform="rotate(180 200 218)" />
+  <ellipse id="flower-petal-6" class="region" cx="200" cy="142" rx="29" ry="68" transform="rotate(225 200 218)" />
+  <ellipse id="flower-petal-7" class="region" cx="200" cy="142" rx="29" ry="68" transform="rotate(270 200 218)" />
+  <ellipse id="flower-petal-8" class="region" cx="200" cy="142" rx="29" ry="68" transform="rotate(315 200 218)" />
+
+  <!-- Centre circle (drawn on top of petals) -->
+  <circle id="flower-center" class="region" cx="200" cy="218" r="44" />
+
+  <!-- Stem -->
+  <rect id="flower-stem" class="region" x="193" y="262" width="14" height="196" rx="7" />
+
+  <!-- Leaves -->
+  <ellipse id="flower-leaf-left"  class="region" cx="152" cy="388" rx="54" ry="20" transform="rotate(-33 152 388)" />
+  <ellipse id="flower-leaf-right" class="region" cx="248" cy="388" rx="54" ry="20" transform="rotate(33 248 388)" />
+
+  <!-- Leaf vein detail lines -->
+  <line class="detail-line" x1="152" y1="376" x2="193" y2="352" />
+  <line class="detail-line" x1="248" y1="376" x2="207" y2="352" />
+
+  <!-- Centre seed dots -->
+  <circle style="fill:#1a1a1a;stroke:none;" cx="194" cy="210" r="4" />
+  <circle style="fill:#1a1a1a;stroke:none;" cx="206" cy="210" r="4" />
+  <circle style="fill:#1a1a1a;stroke:none;" cx="200" cy="204" r="4" />
+  <circle style="fill:#1a1a1a;stroke:none;" cx="200" cy="222" r="4" />
+  <circle style="fill:#1a1a1a;stroke:none;" cx="194" cy="226" r="4" />
+  <circle style="fill:#1a1a1a;stroke:none;" cx="206" cy="226" r="4" />
+</svg>

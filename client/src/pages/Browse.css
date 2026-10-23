@@ -1,0 +1,164 @@
+/* ─── Browse.css ────────────────────────────────────────────────────────────────
+   Styles for the Browse page: search bar, filter buttons, page grid, empty state.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+.browse-page {
+  padding: 2rem 2rem 3rem;
+  background-color: #f0f4f8;
+  min-height: calc(100vh - 60px);
+}
+
+/* ── Page header ── */
+.browse-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1e2a3a;
+  margin: 0 0 0.35rem;
+}
+
+.browse-subtitle {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0 0 1.75rem;
+}
+
+/* ── Search bar ── */
+.browse-search {
+  width: 100%;
+  max-width: 420px;
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  border: 1.5px solid #cdd5e0;
+  border-radius: 8px;
+  outline: none;
+  background: #fff;
+  color: #333;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  margin-bottom: 1.25rem;
+  display: block;
+}
+
+.browse-search:focus {
+  border-color: #3b5bdb;
+  box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.12);
+}
+
+.browse-search::placeholder { color: #aaa; }
+
+/* ── Filter bar ── */
+.browse-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+  align-items: flex-start;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.filter-group-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #888;
+}
+
+.filter-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.filter-btn {
+  padding: 0.38rem 0.85rem;
+  border-radius: 20px;
+  border: 1.5px solid #cdd5e0;
+  background: #fff;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.filter-btn:hover {
+  border-color: #3b5bdb;
+  color: #3b5bdb;
+  background: #eef2ff;
+}
+
+.filter-btn--active {
+  background: #3b5bdb;
+  border-color: #3b5bdb;
+  color: #fff;
+}
+
+.filter-btn--active:hover {
+  background: #2f4ac2;
+  border-color: #2f4ac2;
+}
+
+/* Difficulty active variants */
+.filter-btn--easy.filter-btn--active   { background: #2ecc71; border-color: #27ae60; }
+.filter-btn--medium.filter-btn--active { background: #f39c12; border-color: #d68910; }
+.filter-btn--hard.filter-btn--active   { background: #e74c3c; border-color: #c0392b; }
+
+/* ── Results count ── */
+.browse-results-count {
+  font-size: 0.85rem;
+  color: #888;
+  margin-bottom: 1.25rem;
+}
+
+/* ── Page grid ── */
+.browse-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.75rem;
+}
+
+/* ── Empty state ── */
+.browse-empty {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: #888;
+}
+
+.browse-empty-icon { font-size: 3.5rem; display: block; margin-bottom: 1rem; }
+
+.browse-empty-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #555;
+  margin: 0 0 0.5rem;
+}
+
+.browse-empty-msg { font-size: 0.9rem; margin: 0 0 1.5rem; }
+
+.browse-clear-btn {
+  padding: 0.55rem 1.25rem;
+  border-radius: 8px;
+  background: #3b5bdb;
+  color: #fff;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.browse-clear-btn:hover { background: #2f4ac2; }
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .browse-page { padding: 1.25rem 1rem 2rem; }
+  .browse-title { font-size: 1.5rem; }
+  .browse-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.25rem; }
+}

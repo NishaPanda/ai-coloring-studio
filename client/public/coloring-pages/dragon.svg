@@ -1,0 +1,82 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 400 500"
+  width="400"
+  height="500"
+  role="img"
+  aria-label="Friendly dragon coloring page"
+>
+  <!--
+    Region IDs:
+      dragon-wing-left / dragon-wing-right – wings (behind body)
+      dragon-tail                          – curling tail
+      dragon-body                          – main torso
+      dragon-belly                         – lighter belly patch
+      dragon-head                          – head circle
+      dragon-eye-left / dragon-eye-right   – eyes
+  -->
+  <style>
+    .region { fill:#ffffff; stroke:#1a1a1a; stroke-width:3; stroke-linejoin:round; stroke-linecap:round; }
+    .detail-line { fill:none; stroke:#1a1a1a; stroke-width:2.5; stroke-linecap:round; }
+  </style>
+
+  <!-- Wings (behind body) -->
+  <path id="dragon-wing-left" class="region"
+    d="M 97,288 C 46,238 17,158 65,108 C 98,76 140,95 148,147 C 156,198 142,272 97,288 Z" />
+  <path id="dragon-wing-right" class="region"
+    d="M 303,288 C 354,238 383,158 335,108 C 302,76 260,95 252,147 C 244,198 258,272 303,288 Z" />
+
+  <!-- Tail -->
+  <path id="dragon-tail" class="region"
+    d="M 290,422 C 340,402 382,370 392,330 C 402,290 387,262 368,276
+       C 352,287 360,315 344,328 C 328,341 297,360 268,400 Z" />
+
+  <!-- Body -->
+  <ellipse id="dragon-body"  class="region" cx="200" cy="350" rx="112" ry="122" />
+
+  <!-- Belly patch -->
+  <ellipse id="dragon-belly" class="region" cx="200" cy="362" rx="70"  ry="88" />
+
+  <!-- Head -->
+  <circle id="dragon-head" class="region" cx="200" cy="174" r="82" />
+
+  <!-- Eyes -->
+  <ellipse id="dragon-eye-left"  class="region" cx="172" cy="162" rx="18" ry="20" />
+  <ellipse id="dragon-eye-right" class="region" cx="228" cy="162" rx="18" ry="20" />
+
+  <!-- Pupils -->
+  <ellipse style="fill:#1a1a1a;stroke:none;" cx="173" cy="164" rx="9" ry="13" />
+  <ellipse style="fill:#1a1a1a;stroke:none;" cx="229" cy="164" rx="9" ry="13" />
+
+  <!-- Eye shine -->
+  <circle style="fill:#ffffff;stroke:none;" cx="178" cy="157" r="3.5" />
+  <circle style="fill:#ffffff;stroke:none;" cx="234" cy="157" r="3.5" />
+
+  <!-- Nose -->
+  <ellipse style="fill:#ffffff;stroke:#1a1a1a;stroke-width:2.5;" cx="200" cy="213" rx="20" ry="11" />
+  <circle  style="fill:#1a1a1a;stroke:none;" cx="193" cy="212" r="4.5" />
+  <circle  style="fill:#1a1a1a;stroke:none;" cx="207" cy="212" r="4.5" />
+
+  <!-- Smile -->
+  <path class="detail-line" d="M 178,234 Q 200,248 222,234" />
+
+  <!-- Horns -->
+  <path class="detail-line" d="M 168,96 L 152,52" />
+  <path class="detail-line" d="M 232,96 L 248,52" />
+  <path class="detail-line" d="M 152,52 L 162,68" />
+  <path class="detail-line" d="M 248,52 L 238,68" />
+
+  <!-- Wing veins -->
+  <path class="detail-line" d="M 97,288 C 72,255 52,195 72,148" />
+  <path class="detail-line" d="M 303,288 C 328,255 348,195 328,148" />
+
+  <!-- Belly scale lines -->
+  <path class="detail-line" d="M 165,310 Q 200,300 235,310" />
+  <path class="detail-line" d="M 155,338 Q 200,326 245,338" />
+  <path class="detail-line" d="M 153,366 Q 200,352 247,366" />
+  <path class="detail-line" d="M 158,394 Q 200,380 242,394" />
+
+  <!-- Tail tip spikes -->
+  <path class="detail-line" d="M 378,302 L 395,282" />
+  <path class="detail-line" d="M 390,318 L 408,302" />
+</svg>

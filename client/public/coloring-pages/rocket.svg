@@ -1,0 +1,55 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 400 500"
+  width="400"
+  height="500"
+  role="img"
+  aria-label="Space rocket coloring page"
+>
+  <!--
+    Region IDs:
+      rocket-flame     – engine flame (drawn first, behind fins+body)
+      rocket-fin-left  – left stabiliser fin
+      rocket-fin-right – right stabiliser fin
+      rocket-body      – main fuselage
+      rocket-nose      – nose cone
+      rocket-window    – porthole window
+  -->
+  <style>
+    .region { fill:#ffffff; stroke:#1a1a1a; stroke-width:3; stroke-linejoin:round; stroke-linecap:round; }
+    .detail-line { fill:none; stroke:#1a1a1a; stroke-width:2.5; stroke-linecap:round; }
+  </style>
+
+  <!-- Flame (behind everything) -->
+  <path id="rocket-flame" class="region"
+    d="M 157,390 C 144,434 162,478 200,490 C 238,478 256,434 243,390 Z" />
+
+  <!-- Fins (behind body) -->
+  <polygon id="rocket-fin-left"  class="region" points="157,332 97,422 157,398" />
+  <polygon id="rocket-fin-right" class="region" points="243,332 303,422 243,398" />
+
+  <!-- Main fuselage -->
+  <rect id="rocket-body" class="region" x="157" y="178" width="86" height="212" rx="14" />
+
+  <!-- Nose cone -->
+  <path id="rocket-nose" class="region" d="M 157,178 Q 200,55 243,178 Z" />
+
+  <!-- Porthole window -->
+  <circle id="rocket-window" class="region" cx="200" cy="250" r="36" />
+
+  <!-- Panel lines on body -->
+  <line class="detail-line" x1="157" y1="320" x2="243" y2="320" />
+  <line class="detail-line" x1="157" y1="355" x2="243" y2="355" />
+
+  <!-- Window crosshair -->
+  <line class="detail-line" x1="200" y1="220" x2="200" y2="280" />
+  <line class="detail-line" x1="168" y1="250" x2="232" y2="250" />
+
+  <!-- Nose rivets -->
+  <circle style="fill:#1a1a1a;stroke:none;" cx="192" cy="128" r="3.5" />
+  <circle style="fill:#1a1a1a;stroke:none;" cx="208" cy="128" r="3.5" />
+  <circle style="fill:#1a1a1a;stroke:none;" cx="200" cy="116" r="3.5" />
+
+  <!-- Inner flame detail -->
+  <path class="detail-line" d="M 177,405 C 174,432 186,462 200,470 C 214,462 226,432 223,405" />
+</svg>

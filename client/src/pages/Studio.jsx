@@ -1,57 +1,43 @@
 /**
- * Studio.jsx – Phase 4C: Editing Tools (Eraser · Undo · Redo · Reset)
+ * Studio.jsx – Phase 5: Dynamic page loading from coloringPages.js
  *
- * State managed here:
- *   selectedColor  – active paint color (hex string)
- *   activeTool     – 'fill' | 'eraser'
- *   regionColors   – { regionId: hexColor } current fill state
- *   undoStack      – array of past regionColors snapshots (most-recent last)
- *   redoStack      – array of future regionColors snapshots (most-recent last)
+ * Changes from Phase 4C:
+ *   – Reads :id from the URL via useParams().
+ *   – Looks up the page in coloringPages.js.
+ *   – Initialises regionColors from page.regionIds (not a hardcoded list).
+ *   – Resets all coloring state (colors, undo, redo) when navigating between
+ *     pages (via useEffect on the id param).
+ *   – Renders the matching SVG component (CatSvg | FlowerSvg | RocketSvg |
+ *     DragonSvg) via a lookup map — no hardcoded SVG in this file.
+ *   – Shows the page title + category/difficulty in the header.
+ *   – Shows a friendly "page not found" fallback for unknown ids.
  *
- * History rules:
- *   • Before any fill/erase action we push the current regionColors snapshot
- *     onto undoStack and clear redoStack (new action invalidates redo branch).
- *   • If the clicked region's color would not change we skip recording (no-op
- *     guard prevents pointless history entries).
- *   • Reset clears both stacks and restores all regions to white.
- *   • Undo/Redo swap the current snapshot with the top of the respective stack.
- *
- * Everything from Phase 4B is preserved:
+ * All Phase 4C behavior is fully preserved:
  *   – Color picker, swatch, hex label, active-color strip.
- *   – Inline SVG with regionProps() attaching onClick to each region.
- *   – REGION_STROKE / DETAIL_LINE constants keeping outlines safe from state.
+ *   – Fill tool and Eraser tool with active-state visual.
+ *   – Undo / Redo with history stacks (no-op guard, MAX_HISTORY cap).
+ *   – Reset that clears history.
+ *   – SVG regions: onClick + onKeyDown handlers, cursor styles.
  *
- * Not implemented yet (Phase 5+):
+ * Not implemented yet (Phase 6+):
  *   – Saving artwork, AI features, backend/API changes.
  */
 
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { coloringPages } from '../data/coloringPages';
+import CatSvg    from '../components/svg/CatSvg';
+import FlowerSvg from '../components/svg/FlowerSvg';
+import RocketSvg from '../components/svg/RocketSvg';
+import DragonSvg from '../components/svg/DragonSvg';
 import './Studio.css';
 
 /* ─── Constants ──────────────────────────────────────────────────────────────── */
 
-const REGION_IDS = [
-  'cat-tail',
-  'cat-body',
-  'cat-belly',
-  'cat-paw-left',
-  'cat-paw-right',
-  'cat-ear-left',
-  'cat-ear-right',
-  'cat-head',
-  'cat-eye-left',
-  'cat-eye-right',
-  'cat-nose',
-];
-
 const BLANK_COLOR = '#ffffff';
+const MAX_HISTORY = 50;
 
-/** Build a fresh all-white regionColors object. */
-const buildInitialColors = () =>
-  Object.fromEntries(REGION_IDS.map((id) => [id, BLANK_COLOR]));
-
-/** Inline stroke style applied to every region element — never changes. */
+/** Inline stroke style applied to every region element — never changes with state. */
 const REGION_STROKE = {
   stroke: '#1a1a1a',
   strokeWidth: 3,
@@ -59,145 +45,178 @@ const REGION_STROKE = {
   strokeLinecap: 'round',
 };
 
-/** Style for decorative non-clickable lines (whiskers, mouth, etc.). */
-const DETAIL_LINE = {
-  fill: 'none',
-  stroke: '#1a1a1a',
-  strokeWidth: 2.5,
-  strokeLinecap: 'round',
+/**
+ * SVG_COMPONENTS maps a page id to the matching JSX SVG component.
+ * Add new pages here when more coloring pages are introduced.
+ */
+const SVG_COMPONENTS = {
+  cat:    CatSvg,
+  flower: FlowerSvg,
+  rocket: RocketSvg,
+  dragon: DragonSvg,
 };
 
-/* ─── Maximum undo/redo history length ───────────────────────────────────────── */
-const MAX_HISTORY = 50;
+/** Build a blank regionColors object from a list of region ids. */
+const buildColors = (regionIds) =>
+  Object.fromEntries(regionIds.map((rid) => [rid, BLANK_COLOR]));
 
 /* ─── Studio component ───────────────────────────────────────────────────────── */
 const Studio = () => {
+
+  // ── URL param ────────────────────────────────────────────────────────────────
+  const { id } = useParams();
+
+  // Look up this page in the data file (undefined if id is invalid)
+  const page = coloringPages.find((p) => p.id === id);
 
   // ── Tool state ──────────────────────────────────────────────────────────────
   const [selectedColor, setSelectedColor] = useState('#ff6b6b');
   const [activeTool, setActiveTool]       = useState('fill'); // 'fill' | 'eraser'
 
-  // ── Canvas state ────────────────────────────────────────────────────────────
-  const [regionColors, setRegionColors] = useState(buildInitialColors);
+  // ── Canvas state ─────────────────────────────────────────────────────────────
+  // Initialised from the page's regionIds so every region starts white.
+  const [regionColors, setRegionColors] = useState(() =>
+    page ? buildColors(page.regionIds) : {}
+  );
 
-  // ── History stacks ──────────────────────────────────────────────────────────
-  // Each entry is a full regionColors snapshot (plain object).
-  // undoStack[undoStack.length - 1] is the state just before the latest action.
-  // redoStack[redoStack.length - 1] is the state just after the latest undo.
-  const [undoStack, setUndoStack] = useState([]); // array of snapshots
-  const [redoStack, setRedoStack] = useState([]); // array of snapshots
+  // ── History stacks ───────────────────────────────────────────────────────────
+  const [undoStack, setUndoStack] = useState([]);
+  const [redoStack, setRedoStack] = useState([]);
 
-  // ── Derived flags (used to disable buttons) ──────────────────────────────────
+  // ── Reset coloring state when the user navigates to a different page ─────────
+  // Dependency: id (the URL string). Runs whenever the URL param changes.
+  useEffect(() => {
+    if (page) {
+      setRegionColors(buildColors(page.regionIds));
+      setUndoStack([]);
+      setRedoStack([]);
+      setActiveTool('fill');
+    }
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Derived flags ────────────────────────────────────────────────────────────
   const canUndo = undoStack.length > 0;
   const canRedo = redoStack.length > 0;
 
-  // ── Action handler ──────────────────────────────────────────────────────────
+  // ── Action handler ───────────────────────────────────────────────────────────
   /**
-   * applyAction
-   * Shared logic for fill and erase. Pushes a history entry only when the
-   * region color actually changes.
-   *
-   * @param {string} regionId  – the id of the clicked SVG region
-   * @param {string} newColor  – the color to apply ('#rrggbb' or BLANK_COLOR)
+   * applyAction – shared logic for fill and erase.
+   * Skips recording when the region color wouldn't actually change (no-op guard).
    */
   const applyAction = (regionId, newColor) => {
-    // No-op guard: skip recording if color won't change
-    if (regionColors[regionId] === newColor) return;
+    if ((regionColors[regionId] ?? BLANK_COLOR) === newColor) return;
 
-    // Push current state onto undo stack (cap at MAX_HISTORY)
+    // Push current snapshot onto undo stack (cap at MAX_HISTORY)
     setUndoStack((prev) => {
       const updated = [...prev, regionColors];
-      return updated.length > MAX_HISTORY ? updated.slice(updated.length - MAX_HISTORY) : updated;
+      return updated.length > MAX_HISTORY
+        ? updated.slice(updated.length - MAX_HISTORY)
+        : updated;
     });
 
     // New action always clears redo branch
     setRedoStack([]);
 
-    // Apply the new color to just the clicked region
+    // Apply new color to just the clicked region
     setRegionColors((prev) => ({ ...prev, [regionId]: newColor }));
   };
 
   // ── Region click handler ─────────────────────────────────────────────────────
   const handleRegionClick = (regionId) => {
-    if (activeTool === 'eraser') {
-      applyAction(regionId, BLANK_COLOR);
-    } else {
-      applyAction(regionId, selectedColor);
-    }
+    applyAction(regionId, activeTool === 'eraser' ? BLANK_COLOR : selectedColor);
   };
 
   // ── Undo ─────────────────────────────────────────────────────────────────────
   const handleUndo = () => {
     if (!canUndo) return;
-
     const previousColors = undoStack[undoStack.length - 1];
-
-    // Move current state to redo stack
     setRedoStack((prev) => [...prev, regionColors]);
-
-    // Restore previous state
     setRegionColors(previousColors);
-
-    // Pop the undo stack
     setUndoStack((prev) => prev.slice(0, prev.length - 1));
   };
 
   // ── Redo ─────────────────────────────────────────────────────────────────────
   const handleRedo = () => {
     if (!canRedo) return;
-
     const nextColors = redoStack[redoStack.length - 1];
-
-    // Move current state back to undo stack
     setUndoStack((prev) => [...prev, regionColors]);
-
-    // Restore next state
     setRegionColors(nextColors);
-
-    // Pop the redo stack
     setRedoStack((prev) => prev.slice(0, prev.length - 1));
   };
 
-  // ── Reset ─────────────────────────────────────────────────────────────────────
+  // ── Reset ────────────────────────────────────────────────────────────────────
   const handleReset = () => {
-    setRegionColors(buildInitialColors());
+    if (!page) return;
+    setRegionColors(buildColors(page.regionIds));
     setUndoStack([]);
     setRedoStack([]);
   };
 
-  // ── regionProps helper ────────────────────────────────────────────────────────
+  // ── regionProps helper ───────────────────────────────────────────────────────
   /**
-   * Returns all JSX props needed for a colorable SVG region element.
-   * The cursor class switches based on the active tool so the user always
-   * gets a clear visual cue for what will happen on click.
+   * Returns all JSX props for a colorable SVG region element.
+   * Passed down to each SVG component so regions are interactive.
    */
-  const regionProps = (id) => ({
-    id,
-    // 'region' for the base CSS; 'region--eraser' when eraser is active
+  const regionProps = (regionId) => ({
+    id: regionId,
     className: `region${activeTool === 'eraser' ? ' region--eraser' : ''}`,
-    style: { fill: regionColors[id], ...REGION_STROKE },
-    onClick: () => handleRegionClick(id),
+    style: { fill: regionColors[regionId] ?? BLANK_COLOR, ...REGION_STROKE },
+    onClick: () => handleRegionClick(regionId),
     role: 'button',
-    'aria-label': `${activeTool === 'eraser' ? 'Erase' : 'Color'} ${id.replace('cat-', '').replace(/-/g, ' ')} region`,
+    'aria-label': `${activeTool === 'eraser' ? 'Erase' : 'Color'} ${regionId
+      .replace(/^[^-]+-/, '')
+      .replace(/-/g, ' ')} region`,
     tabIndex: 0,
     onKeyDown: (e) => {
-      if (e.key === 'Enter' || e.key === ' ') handleRegionClick(id);
+      if (e.key === 'Enter' || e.key === ' ') handleRegionClick(regionId);
     },
   });
 
-  /* ── JSX ─────────────────────────────────────────────────────────────────── */
+  // ── Resolve the SVG component for this page ───────────────────────────────────
+  const SvgComponent = page ? SVG_COMPONENTS[page.id] : null;
+
+  /* ── Page not found fallback ──────────────────────────────────────────────── */
+  if (!page) {
+    return (
+      <div className="studio-page">
+        <header className="studio-header">
+          <Link to="/browse" className="studio-back-link" aria-label="Back to Browse">
+            ← Browse
+          </Link>
+          <h1 className="studio-title">Coloring Studio</h1>
+        </header>
+        <div className="studio-not-found">
+          <span className="studio-not-found-icon">🎨</span>
+          <p className="studio-not-found-msg">
+            Coloring page <strong>&quot;{id}&quot;</strong> was not found.
+          </p>
+          <Link to="/browse" className="studio-back-link">
+            ← Back to Browse
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Main render ─────────────────────────────────────────────────────────── */
   return (
     <div className="studio-page">
 
-      {/* ── Header ── */}
+      {/* ── Header: back link + page title + meta ── */}
       <header className="studio-header">
         <Link to="/browse" className="studio-back-link" aria-label="Back to Browse">
           ← Browse
         </Link>
-        <h1 className="studio-title">Coloring Studio</h1>
+        <h1 className="studio-title">{page.title}</h1>
+        <div className="studio-page-meta">
+          <span className="studio-category-label">{page.category}</span>
+          <span className={`studio-difficulty-badge studio-difficulty-badge--${page.difficulty.toLowerCase()}`}>
+            {page.difficulty}
+          </span>
+        </div>
       </header>
 
-      {/* ── Main body ── */}
+      {/* ── Main body: toolbar + workspace ── */}
       <div className="studio-body">
 
         {/* ══════════════════════════════════════════
@@ -211,7 +230,6 @@ const Studio = () => {
             <span className="tool-section-label">🎨 Paint color</span>
 
             <div className="color-picker-wrapper">
-              {/* Large swatch — clicking opens the native color picker */}
               <label
                 htmlFor="color-input"
                 className="color-swatch-preview"
@@ -219,7 +237,6 @@ const Studio = () => {
                 title="Click to open color picker"
                 aria-label="Current color swatch – click to change"
               />
-
               <div className="color-input-row">
                 <input
                   id="color-input"
@@ -250,9 +267,7 @@ const Studio = () => {
           {/* ── Tool selector: Fill / Eraser ── */}
           <div className="tool-section">
             <span className="tool-section-label">✏️ Active tool</span>
-
             <div className="tool-btn-group">
-              {/* Fill tool */}
               <button
                 id="tool-fill"
                 className={`tool-btn${activeTool === 'fill' ? ' tool-btn--active' : ''}`}
@@ -263,8 +278,6 @@ const Studio = () => {
                 <span className="tool-icon">🪣</span>
                 Fill
               </button>
-
-              {/* Eraser tool */}
               <button
                 id="tool-eraser"
                 className={`tool-btn${activeTool === 'eraser' ? ' tool-btn--active tool-btn--eraser-active' : ''}`}
@@ -280,7 +293,7 @@ const Studio = () => {
 
           <hr className="toolbar-divider" />
 
-          {/* ── History tools: Undo / Redo ── */}
+          {/* ── History: Undo / Redo ── */}
           <div className="tool-btn-group">
             <button
               id="tool-undo"
@@ -293,7 +306,6 @@ const Studio = () => {
               <span className="tool-icon">↩️</span>
               Undo
             </button>
-
             <button
               id="tool-redo"
               className="tool-btn tool-btn--action"
@@ -323,96 +335,19 @@ const Studio = () => {
         </aside>
 
         {/* ══════════════════════════════════════════
-            Central workspace — inline SVG
+            Central workspace — dynamic SVG component
             ══════════════════════════════════════════ */}
         <section className="studio-workspace" aria-label="Coloring workspace">
           <span className="studio-canvas-label">Canvas</span>
 
           <div className="studio-svg-wrapper">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 400 500"
-              aria-label="Cat coloring page – click a region to color or erase it"
-              role="img"
-            >
-              {/* ── Tail (drawn first so body sits on top) ── */}
-              <path
-                {...regionProps('cat-tail')}
-                d="M 230 380
-                   C 300 370, 340 320, 320 270
-                   C 310 250, 290 255, 285 275
-                   C 295 305, 265 340, 215 350
-                   Z"
-              />
-
-              {/* ── Body ── */}
-              <ellipse {...regionProps('cat-body')} cx="200" cy="360" rx="100" ry="110" />
-
-              {/* ── Belly patch ── */}
-              <ellipse {...regionProps('cat-belly')} cx="200" cy="375" rx="52" ry="68" />
-
-              {/* ── Left front paw ── */}
-              <ellipse {...regionProps('cat-paw-left')} cx="145" cy="455" rx="32" ry="18" />
-
-              {/* ── Right front paw ── */}
-              <ellipse {...regionProps('cat-paw-right')} cx="255" cy="455" rx="32" ry="18" />
-
-              {/* ── Left ear ── */}
-              <polygon {...regionProps('cat-ear-left')} points="130,185 110,120 170,165" />
-
-              {/* ── Right ear ── */}
-              <polygon {...regionProps('cat-ear-right')} points="270,185 290,120 230,165" />
-
-              {/* ── Head ── */}
-              <circle {...regionProps('cat-head')} cx="200" cy="210" r="90" />
-
-              {/* ── Left eye ── */}
-              <ellipse {...regionProps('cat-eye-left')} cx="168" cy="200" rx="18" ry="20" />
-
-              {/* ── Right eye ── */}
-              <ellipse {...regionProps('cat-eye-right')} cx="232" cy="200" rx="18" ry="20" />
-
-              {/* ── Pupils (non-interactive – always black) ── */}
-              <ellipse style={{ fill: '#1a1a1a' }} cx="170" cy="202" rx="9" ry="13" />
-              <ellipse style={{ fill: '#1a1a1a' }} cx="234" cy="202" rx="9" ry="13" />
-
-              {/* ── Eye shine ── */}
-              <circle style={{ fill: '#ffffff' }} cx="174" cy="197" r="3" />
-              <circle style={{ fill: '#ffffff' }} cx="238" cy="197" r="3" />
-
-              {/* ── Nose ── */}
-              <polygon {...regionProps('cat-nose')} points="200,238 192,250 208,250" />
-
-              {/* ── Mouth curves (detail lines – no click) ── */}
-              <path style={DETAIL_LINE} d="M 192 250 Q 185 262 178 260" />
-              <path style={DETAIL_LINE} d="M 208 250 Q 215 262 222 260" />
-
-              {/* ── Whiskers left ── */}
-              <line style={DETAIL_LINE} x1="155" y1="248" x2="115" y2="240" />
-              <line style={DETAIL_LINE} x1="155" y1="256" x2="112" y2="258" />
-              <line style={DETAIL_LINE} x1="155" y1="264" x2="118" y2="272" />
-
-              {/* ── Whiskers right ── */}
-              <line style={DETAIL_LINE} x1="245" y1="248" x2="285" y2="240" />
-              <line style={DETAIL_LINE} x1="245" y1="256" x2="288" y2="258" />
-              <line style={DETAIL_LINE} x1="245" y1="264" x2="282" y2="272" />
-
-              {/* ── Inner ear lines ── */}
-              <line style={DETAIL_LINE} x1="128" y1="175" x2="148" y2="145" />
-              <line style={DETAIL_LINE} x1="148" y1="145" x2="163" y2="168" />
-              <line style={DETAIL_LINE} x1="272" y1="175" x2="252" y2="145" />
-              <line style={DETAIL_LINE} x1="252" y1="145" x2="237" y2="168" />
-
-              {/* ── Paw toe lines left ── */}
-              <line style={DETAIL_LINE} x1="130" y1="450" x2="130" y2="462" />
-              <line style={DETAIL_LINE} x1="145" y1="448" x2="145" y2="462" />
-              <line style={DETAIL_LINE} x1="160" y1="450" x2="160" y2="462" />
-
-              {/* ── Paw toe lines right ── */}
-              <line style={DETAIL_LINE} x1="240" y1="450" x2="240" y2="462" />
-              <line style={DETAIL_LINE} x1="255" y1="448" x2="255" y2="462" />
-              <line style={DETAIL_LINE} x1="270" y1="450" x2="270" y2="462" />
-            </svg>
+            {/*
+             * SvgComponent is one of: CatSvg | FlowerSvg | RocketSvg | DragonSvg
+             * It receives regionProps — the function that attaches fill state,
+             * click handlers, and keyboard handlers to each SVG region element.
+             * No SVG markup lives in Studio.jsx itself.
+             */}
+            {SvgComponent && <SvgComponent regionProps={regionProps} />}
           </div>
         </section>
 

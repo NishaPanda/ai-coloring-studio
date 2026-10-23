@@ -1,6 +1,6 @@
 /* ─── Studio.css ───────────────────────────────────────────────────────────────
-   Styles for the Phase 4C coloring workspace.
-   Updated: eraser · undo · redo · reset toolbar buttons + active-tool indicator.
+   Styles for the Phase 4C / Phase 5 coloring workspace.
+   Phase 5 additions: page metadata header, difficulty badge, not-found state.
    ──────────────────────────────────────────────────────────────────────────── */
 
 /* ── Page wrapper ── */
@@ -46,6 +46,57 @@
   font-size: 1.6rem;
   font-weight: 700;
   color: #1e2a3a;
+  margin: 0;
+}
+
+/* ── Page metadata (category + difficulty) shown in header ── */
+.studio-page-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.studio-category-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.studio-difficulty-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.22rem 0.6rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.studio-difficulty-badge--easy   { background: #d4f5e2; color: #1a7a45; }
+.studio-difficulty-badge--medium { background: #fef3cd; color: #8a5a00; }
+.studio-difficulty-badge--hard   { background: #fde0e0; color: #9b1c1c; }
+
+/* ── Not-found fallback state ── */
+.studio-not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex: 1;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: #666;
+}
+
+.studio-not-found-icon { font-size: 3rem; }
+
+.studio-not-found-msg {
+  font-size: 1rem;
   margin: 0;
 }
 
