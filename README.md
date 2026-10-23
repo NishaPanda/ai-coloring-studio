@@ -1,104 +1,145 @@
+
 # 🎨 AI Coloring Studio
 
-A web application where users can browse and digitally color coloring pages, with AI-powered color palette suggestions.
+A full-stack web application to explore coloring pages, color illustrations, save artwork, and get AI-powered color palette suggestions.
 
-Built as a learning project to practice full-stack development and GitHub Actions CI/CD.
+Built using the MERN stack to practice full-stack development, automated testing, and CI/CD.
 
----
+## ✨ Features
 
-## Tech Stack
+- 🔐 User registration and login with JWT authentication
+- 🔎 Browse and search coloring pages by category and difficulty
+- 🎨 Interactive coloring canvas with color picker, Fill, Eraser, Undo, Redo, and Reset
+- 🖼️ Save, edit, and delete artwork
+- 🗂️ Personal artwork gallery
+- 🤖 AI-powered color palette suggestions with fallback palettes
+- 🧪 Automated backend and frontend tests
+- ⚙️ GitHub Actions CI/CD for automated testing and builds
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React + Vite |
-| Backend | Node.js + Express |
-| Database | MongoDB Atlas |
-| Auth | JWT |
-| HTTP Client | Axios |
+## 🛠️ Tech Stack
 
----
+| Layer | Technologies |
+|---|---|
+| Frontend | React, Vite, JavaScript, CSS |
+| Backend | Node.js, Express.js |
+| Database | MongoDB Atlas, Mongoose |
+| Authentication | JWT, bcryptjs |
+| AI | Google Gemini API |
+| Testing | Node.js Test Runner, Vitest, React Testing Library |
+| CI/CD | GitHub Actions |
 
-## Project Structure
+## 🏗️ Architecture
 
+```mermaid
+flowchart TD
+    A[User] --> B[React + Vite]
+    B --> C[Express REST API]
+    C --> D[(MongoDB Atlas)]
+    C --> E[Gemini API]
+    E --> F[Color Palette Suggestions]
+    F --> B
 ```
+
+## 📁 Project Structure
+
+```text
 ai-coloring-studio/
-├── client/     # React + Vite frontend
-├── server/     # Node.js + Express backend
+├── .github/workflows/
+│   └── ci.yml
+├── client/
+│   ├── public/coloring-pages/
+│   └── src/
+│       ├── components/
+│       ├── pages/
+│       ├── services/
+│       └── __tests__/
+├── server/
+│   ├── controllers/
+│   ├── models/
+│   ├── routes/
+│   ├── middleware/
+│   └── tests/
 └── README.md
 ```
 
----
+## 🚀 Getting Started
 
-## Getting Started
+**Prerequisites:** Node.js and npm.
 
-### Prerequisites
-- Node.js v18+
-- A MongoDB Atlas account and cluster
-- A Google Gemini API key (for AI suggestions, added later)
+Clone the repository:
 
-### 1. Clone the repository
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/NishaPanda/ai-coloring-studio.git
 cd ai-coloring-studio
 ```
 
-### 2. Set up the backend
+Start the backend in one terminal:
+
 ```bash
 cd server
-cp .env.example .env
-# Fill in your values in .env
 npm install
 npm run dev
 ```
 
-### 3. Set up the frontend
+Start the frontend in a second terminal:
+
 ```bash
 cd client
-cp .env.example .env
-# Fill in your values in .env
 npm install
 npm run dev
 ```
 
-### 4. Open in browser
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:5000/api/test
+Open the frontend at **http://localhost:5173**.
 
----
+## 🧪 Testing
 
-## Features (Planned)
+Run backend tests:
 
-- [ ] User registration and login
-- [ ] Browse coloring pages by category and difficulty
-- [ ] Interactive coloring canvas (color picker, fill, eraser, undo/redo)
-- [ ] Save and view your colored artwork
-- [ ] AI color palette suggestions
+```bash
+cd server
+npm test
+```
 
----
+Run frontend tests:
 
-## 📌 Project Progress
+```bash
+cd client
+npm test
+```
 
-✅ Phase 1 — Project Setup
+Build the frontend:
 
-✅ Phase 2 — Basic Application Structure
+```bash
+npm run build
+```
 
-✅ Phase 3 — Authentication
+**Latest verified results:** 28 backend tests passed, 14 frontend tests passed, and the production build succeeded.
 
-⬜ Phase 4 — Interactive Coloring Studio
+## ⚙️ CI/CD
 
-⬜ Phase 5 — Coloring Pages & Browse
+GitHub Actions automatically runs backend tests, frontend tests, and the frontend production build on pushes to `main` and pull requests targeting `main`.
 
-⬜ Phase 6 — Artwork & Gallery
-
-⬜ Phase 7 — AI Color Suggestions
-
-⬜ Phase 8 — Testing
-
-⬜ Phase 9 — CI/CD
-
-⬜ Phase 10 — Deployment
+[View GitHub Actions](https://github.com/NishaPanda/ai-coloring-studio/actions)
 
 
-## License
+## 📌 Project Roadmap
 
-MIT
+| Phase | Description | Status |
+|---|---|---|
+| Phase 1 | Project Setup | ✅ Complete |
+| Phase 2 | Basic Application Structure | ✅ Complete |
+| Phase 3 | Authentication | ✅ Complete |
+| Phase 4 | Interactive Coloring Studio | ✅ Complete |
+| Phase 5 | Coloring Pages & Browse | ✅ Complete |
+| Phase 6 | Artwork & Gallery | ✅ Complete |
+| Phase 7 | AI Color Suggestions | ✅ Complete |
+| Phase 8 | Automated Testing | ✅ Complete |
+| Phase 9 | CI/CD with GitHub Actions | ✅ Complete |
+| Phase 10 | Deployment | ⬜ Pending |
+
+
+## 🔮 Future Improvements
+
+- Polish the UI with a modern, responsive design.
+- Deploy the application.
+- Expand test coverage and add new coloring features.
