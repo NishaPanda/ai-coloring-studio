@@ -1,21 +1,23 @@
 /**
- * Studio.jsx – Phase 6: Artwork Saving & Loading
+ * Studio.jsx – Phase 7: AI Color Suggestions + Artwork Saving & Loading
  *
- * Preserves all Phase 4 & Phase 5 features:
+ * Preserves all Phase 4, 5 & 6 features:
  *   – Dynamic page loading from coloringPages.js based on URL param (:id)
  *   – Color picker, swatch, hex label, active-color indicator
  *   – Fill tool and Eraser tool with active visual state
  *   – Undo / Redo with history stacks (no-op guard, MAX_HISTORY cap)
  *   – Reset all that clears history
  *   – Interactive SVG regions with click and keyboard support
- *
- * Phase 6 additions:
  *   – Reopen saved artwork via ?artworkId= query param
- *   – Fetches saved region colors and restores state
- *   – Resets undo/redo history upon loading saved artwork
  *   – Saves new artwork or updates existing record without duplicates
- *   – Loading, saving, success, and error feedback states
- *   – Auth awareness: prompts guest users to log in to save
+ *
+ * Phase 7 additions:
+ *   – AI Color Suggestions button in toolbar
+ *   – Fetches coordinated palette of 5–8 colors based on page theme
+ *   – Displays clickable swatches with color names & suggested roles
+ *   – Clicking a swatch updates selectedColor without filling regions
+ *   – Loading, error, retry, notice, and empty states
+ *   – Resets palette when navigating between different coloring pages
  */
 
 import { useState, useEffect, useContext, useCallback } from 'react';
@@ -23,6 +25,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { coloringPages } from '../data/coloringPages';
 import { createArtwork, updateArtwork, getArtworkById } from '../services/artworkService';
+import { suggestColors } from '../services/aiService';
 import CatSvg    from '../components/svg/CatSvg';
 import FlowerSvg from '../components/svg/FlowerSvg';
 import RocketSvg from '../components/svg/RocketSvg';
@@ -89,6 +92,12 @@ const Studio = () => {
   const [saveFeedback, setSaveFeedback]         = useState(null); // { type: 'success' | 'error' | 'info', message: string }
   const [loadError, setLoadError]               = useState(null);
 
+  // ── Phase 7: AI Color Suggestions state ──────────────────────────────────────
+  const [aiPalette, setAiPalette]                     = useState(null); // { paletteName, themeDescription, colors: [] }
+  const [isGeneratingPalette, setIsGeneratingPalette] = useState(false);
+  const [paletteError, setPaletteError]               = useState(null);
+  const [paletteNotice, setPaletteNotice]             = useState(null);
+
   // ── Helper to clear feedback banner after a delay ────────────────────────────
   const showFeedback = (type, message, duration = 4000) => {
     setSaveFeedback({ type, message });
@@ -140,6 +149,12 @@ const Studio = () => {
   // ── Reset state when page ID changes or initialize saved artwork ──────────────
   useEffect(() => {
     if (page) {
+      // Phase 7 requirement: reset displayed palette when switching coloring pages
+      setAiPalette(null);
+      setPaletteError(null);
+      setPaletteNotice(null);
+      setIsGeneratingPalette(false);
+
       if (artworkIdParam) {
         loadSavedArtwork(artworkIdParam);
       } else {
@@ -259,6 +274,46 @@ const Studio = () => {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // ── Phase 7: AI Color Suggestion Handlers ────────────────────────────────────
+  const handleSuggestColors = async () => {
+    if (!page) return;
+    setIsGeneratingPalette(true);
+    setPaletteError(null);
+    setPaletteNotice(null);
+
+    try {
+      const data = await suggestColors({
+        pageId: page.id,
+        title: page.title,
+        category: page.category,
+        description: page.description,
+      });
+
+      if (data.success && data.palette) {
+        setAiPalette(data.palette);
+        if (data.isFallback) {
+          setPaletteNotice(data.message);
+        }
+      } else {
+        setPaletteError('Could not generate palette. Please try again.');
+      }
+    } catch (err) {
+      console.error('AI Suggestion error:', err);
+      setPaletteError(err.response?.data?.message || 'Could not fetch color suggestions. Please try again.');
+    } finally {
+      setIsGeneratingPalette(false);
+    }
+  };
+
+  /**
+   * Clicking a suggested swatch updates only the selected paint color;
+   * it does NOT color a region automatically.
+   */
+  const handleSelectSuggestedColor = (hex) => {
+    setSelectedColor(hex);
+    setActiveTool('fill');
   };
 
   // ── regionProps helper ───────────────────────────────────────────────────────
@@ -393,6 +448,108 @@ const Studio = () => {
 
           <hr className="toolbar-divider" />
 
+          {/* ── Phase 7: AI Color Suggestions Section ── */}
+          <div className="tool-section studio-ai-palette-section">
+            <div className="ai-palette-header">
+              <span className="tool-section-label">✨ AI Palette</span>
+              {aiPalette && (
+                <button
+                  className="btn-ai-refresh"
+                  onClick={handleSuggestColors}
+                  disabled={isGeneratingPalette}
+                  title="Generate new color suggestions"
+                  aria-label="Regenerate AI palette"
+                >
+                  🔄
+                </button>
+              )}
+            </div>
+
+            {/* Empty State: Prompt button */}
+            {!aiPalette && !isGeneratingPalette && !paletteError && (
+              <div className="ai-palette-empty">
+                <p className="ai-palette-desc">
+                  Need inspiration? Get a coordinated palette customized for {page.title}.
+                </p>
+                <button
+                  id="btn-suggest-colors"
+                  className="btn-ai-suggest"
+                  onClick={handleSuggestColors}
+                >
+                  <span className="ai-btn-sparkle">✨</span>
+                  Suggest Colors
+                </button>
+              </div>
+            )}
+
+            {/* Loading State */}
+            {isGeneratingPalette && (
+              <div className="ai-palette-loading" aria-live="polite">
+                <div className="ai-loading-shimmer-row">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="ai-swatch-skeleton" />
+                  ))}
+                </div>
+                <p className="ai-loading-text">Generating palette...</p>
+              </div>
+            )}
+
+            {/* Error State with Retry Button */}
+            {paletteError && !isGeneratingPalette && (
+              <div className="ai-palette-error" role="alert">
+                <p className="ai-error-text">⚠️ {paletteError}</p>
+                <button className="btn-ai-retry" onClick={handleSuggestColors}>
+                  Retry
+                </button>
+              </div>
+            )}
+
+            {/* Fallback Notice Banner */}
+            {paletteNotice && aiPalette && !isGeneratingPalette && (
+              <div className="ai-palette-notice" role="status">
+                <span className="ai-notice-icon">💡</span>
+                <span className="ai-notice-text">{paletteNotice}</span>
+              </div>
+            )}
+
+            {/* Generated Color Swatches */}
+            {aiPalette && !isGeneratingPalette && (
+              <div className="ai-palette-content">
+                <div className="ai-palette-title-row">
+                  <span className="ai-palette-name">{aiPalette.paletteName}</span>
+                </div>
+                {aiPalette.themeDescription && (
+                  <p className="ai-palette-theme">{aiPalette.themeDescription}</p>
+                )}
+
+                <div className="ai-swatches-grid" role="group" aria-label="Suggested colors">
+                  {aiPalette.colors.map((c, idx) => {
+                    const isSelected = selectedColor.toLowerCase() === c.hex.toLowerCase();
+                    return (
+                      <button
+                        key={`${c.hex}-${idx}`}
+                        className={`ai-swatch-btn${isSelected ? ' ai-swatch-btn--selected' : ''}`}
+                        style={{ backgroundColor: c.hex }}
+                        onClick={() => handleSelectSuggestedColor(c.hex)}
+                        title={`${c.name} (${c.hex.toUpperCase()})${c.role ? ' — ' + c.role : ''}`}
+                        aria-label={`Select ${c.name} (${c.hex})`}
+                        aria-pressed={isSelected}
+                      >
+                        {isSelected && <span className="ai-swatch-check">✓</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <p className="ai-swatch-hint">
+                  Click any color swatch to load it into your paintbrush!
+                </p>
+              </div>
+            )}
+          </div>
+
+          <hr className="toolbar-divider" />
+
           {/* ── Tool selector: Fill / Eraser ── */}
           <div className="tool-section">
             <span className="tool-section-label">✏️ Active tool</span>
@@ -464,7 +621,7 @@ const Studio = () => {
 
           <hr className="toolbar-divider" />
 
-          {/* ── Phase 6: Save Artwork Section ── */}
+          {/* ── Save Artwork Section ── */}
           <div className="tool-section studio-save-section">
             <span className="tool-section-label">💾 Save artwork</span>
 

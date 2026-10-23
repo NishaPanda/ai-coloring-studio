@@ -5,6 +5,7 @@ import connectDB from './config/db.js';
 import testRoutes from './routes/testRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import artworkRoutes from './routes/artworkRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
 import { errorHandler } from './middleware/errorMiddleware.js';
 
 // Load environment variables from .env file
@@ -34,6 +35,9 @@ app.use('/api/auth', authRoutes);
 
 // Artwork routes (Phase 6)
 app.use('/api/artworks', artworkRoutes);
+
+// AI routes (Phase 7)
+app.use('/api/ai', aiRoutes);
 
 // A simple test route to confirm the API is running
 app.use('/api', testRoutes);
