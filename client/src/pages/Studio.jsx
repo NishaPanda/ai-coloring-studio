@@ -1,31 +1,28 @@
 /**
- * Studio.jsx – Phase 5: Dynamic page loading from coloringPages.js
+ * Studio.jsx – Phase 6: Artwork Saving & Loading
  *
- * Changes from Phase 4C:
- *   – Reads :id from the URL via useParams().
- *   – Looks up the page in coloringPages.js.
- *   – Initialises regionColors from page.regionIds (not a hardcoded list).
- *   – Resets all coloring state (colors, undo, redo) when navigating between
- *     pages (via useEffect on the id param).
- *   – Renders the matching SVG component (CatSvg | FlowerSvg | RocketSvg |
- *     DragonSvg) via a lookup map — no hardcoded SVG in this file.
- *   – Shows the page title + category/difficulty in the header.
- *   – Shows a friendly "page not found" fallback for unknown ids.
+ * Preserves all Phase 4 & Phase 5 features:
+ *   – Dynamic page loading from coloringPages.js based on URL param (:id)
+ *   – Color picker, swatch, hex label, active-color indicator
+ *   – Fill tool and Eraser tool with active visual state
+ *   – Undo / Redo with history stacks (no-op guard, MAX_HISTORY cap)
+ *   – Reset all that clears history
+ *   – Interactive SVG regions with click and keyboard support
  *
- * All Phase 4C behavior is fully preserved:
- *   – Color picker, swatch, hex label, active-color strip.
- *   – Fill tool and Eraser tool with active-state visual.
- *   – Undo / Redo with history stacks (no-op guard, MAX_HISTORY cap).
- *   – Reset that clears history.
- *   – SVG regions: onClick + onKeyDown handlers, cursor styles.
- *
- * Not implemented yet (Phase 6+):
- *   – Saving artwork, AI features, backend/API changes.
+ * Phase 6 additions:
+ *   – Reopen saved artwork via ?artworkId= query param
+ *   – Fetches saved region colors and restores state
+ *   – Resets undo/redo history upon loading saved artwork
+ *   – Saves new artwork or updates existing record without duplicates
+ *   – Loading, saving, success, and error feedback states
+ *   – Auth awareness: prompts guest users to log in to save
  */
 
-import { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useState, useEffect, useContext, useCallback } from 'react';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import { coloringPages } from '../data/coloringPages';
+import { createArtwork, updateArtwork, getArtworkById } from '../services/artworkService';
 import CatSvg    from '../components/svg/CatSvg';
 import FlowerSvg from '../components/svg/FlowerSvg';
 import RocketSvg from '../components/svg/RocketSvg';
@@ -47,7 +44,6 @@ const REGION_STROKE = {
 
 /**
  * SVG_COMPONENTS maps a page id to the matching JSX SVG component.
- * Add new pages here when more coloring pages are introduced.
  */
 const SVG_COMPONENTS = {
   cat:    CatSvg,
@@ -62,9 +58,12 @@ const buildColors = (regionIds) =>
 
 /* ─── Studio component ───────────────────────────────────────────────────────── */
 const Studio = () => {
+  const { user } = useContext(AuthContext);
 
-  // ── URL param ────────────────────────────────────────────────────────────────
+  // ── URL param & Query param ──────────────────────────────────────────────────
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const artworkIdParam = searchParams.get('artworkId');
 
   // Look up this page in the data file (undefined if id is invalid)
   const page = coloringPages.find((p) => p.id === id);
@@ -74,7 +73,6 @@ const Studio = () => {
   const [activeTool, setActiveTool]       = useState('fill'); // 'fill' | 'eraser'
 
   // ── Canvas state ─────────────────────────────────────────────────────────────
-  // Initialised from the page's regionIds so every region starts white.
   const [regionColors, setRegionColors] = useState(() =>
     page ? buildColors(page.regionIds) : {}
   );
@@ -83,26 +81,86 @@ const Studio = () => {
   const [undoStack, setUndoStack] = useState([]);
   const [redoStack, setRedoStack] = useState([]);
 
-  // ── Reset coloring state when the user navigates to a different page ─────────
-  // Dependency: id (the URL string). Runs whenever the URL param changes.
+  // ── Artwork persistence state ────────────────────────────────────────────────
+  const [currentArtworkId, setCurrentArtworkId] = useState(artworkIdParam || null);
+  const [artworkTitle, setArtworkTitle]         = useState('');
+  const [isSaving, setIsSaving]                 = useState(false);
+  const [isLoadingArtwork, setIsLoadingArtwork] = useState(false);
+  const [saveFeedback, setSaveFeedback]         = useState(null); // { type: 'success' | 'error' | 'info', message: string }
+  const [loadError, setLoadError]               = useState(null);
+
+  // ── Helper to clear feedback banner after a delay ────────────────────────────
+  const showFeedback = (type, message, duration = 4000) => {
+    setSaveFeedback({ type, message });
+    if (duration > 0) {
+      setTimeout(() => {
+        setSaveFeedback((current) => (current?.message === message ? null : current));
+      }, duration);
+    }
+  };
+
+  // ── Reopen saved artwork if artworkIdParam is present ────────────────────────
+  const loadSavedArtwork = useCallback(async (artId) => {
+    if (!artId || !page) return;
+    setIsLoadingArtwork(true);
+    setLoadError(null);
+
+    try {
+      const response = await getArtworkById(artId);
+      const loadedArtwork = response.artwork;
+
+      if (loadedArtwork) {
+        setCurrentArtworkId(loadedArtwork._id);
+        setArtworkTitle(loadedArtwork.title || `${page.title} Artwork`);
+
+        // Convert Map to plain object if needed, and merge over blank defaults
+        const rawColors = loadedArtwork.regionColors;
+        const colorMap = rawColors instanceof Map ? Object.fromEntries(rawColors) : (rawColors || {});
+
+        setRegionColors({
+          ...buildColors(page.regionIds),
+          ...colorMap,
+        });
+
+        // Reset undo and redo history for the newly loaded artwork baseline
+        setUndoStack([]);
+        setRedoStack([]);
+        setActiveTool('fill');
+      }
+    } catch (err) {
+      console.error('Failed to load saved artwork:', err);
+      const msg = err.response?.data?.message || 'Could not load the saved artwork.';
+      setLoadError(msg);
+      showFeedback('error', msg, 6000);
+    } finally {
+      setIsLoadingArtwork(false);
+    }
+  }, [page]);
+
+  // ── Reset state when page ID changes or initialize saved artwork ──────────────
   useEffect(() => {
     if (page) {
-      setRegionColors(buildColors(page.regionIds));
-      setUndoStack([]);
-      setRedoStack([]);
-      setActiveTool('fill');
+      if (artworkIdParam) {
+        loadSavedArtwork(artworkIdParam);
+      } else {
+        // Fresh blank canvas for this page
+        setCurrentArtworkId(null);
+        setArtworkTitle(`${page.title} Artwork`);
+        setRegionColors(buildColors(page.regionIds));
+        setUndoStack([]);
+        setRedoStack([]);
+        setActiveTool('fill');
+        setSaveFeedback(null);
+        setLoadError(null);
+      }
     }
-  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [id, artworkIdParam, page, loadSavedArtwork]);
 
   // ── Derived flags ────────────────────────────────────────────────────────────
   const canUndo = undoStack.length > 0;
   const canRedo = redoStack.length > 0;
 
   // ── Action handler ───────────────────────────────────────────────────────────
-  /**
-   * applyAction – shared logic for fill and erase.
-   * Skips recording when the region color wouldn't actually change (no-op guard).
-   */
   const applyAction = (regionId, newColor) => {
     if ((regionColors[regionId] ?? BLANK_COLOR) === newColor) return;
 
@@ -152,11 +210,58 @@ const Studio = () => {
     setRedoStack([]);
   };
 
+  // ── Save or Update Artwork ───────────────────────────────────────────────────
+  const handleSave = async () => {
+    if (!user) {
+      showFeedback('error', 'Please log in to save your artwork.', 5000);
+      return;
+    }
+
+    if (!page) return;
+
+    const trimmedTitle = artworkTitle.trim() || `${page.title} Artwork`;
+    setIsSaving(true);
+    setSaveFeedback(null);
+
+    try {
+      if (currentArtworkId) {
+        // Update existing artwork record (no duplicate creation)
+        const response = await updateArtwork(currentArtworkId, {
+          title: trimmedTitle,
+          regionColors,
+        });
+
+        if (response.success) {
+          showFeedback('success', 'Artwork changes saved successfully!');
+          if (response.artwork?.title) {
+            setArtworkTitle(response.artwork.title);
+          }
+        }
+      } else {
+        // Create new artwork record
+        const response = await createArtwork({
+          pageId: page.id,
+          pageTitle: page.title,
+          title: trimmedTitle,
+          regionColors,
+        });
+
+        if (response.success && response.artwork?._id) {
+          setCurrentArtworkId(response.artwork._id);
+          setArtworkTitle(response.artwork.title);
+          showFeedback('success', 'Artwork saved to your Gallery!');
+        }
+      }
+    } catch (err) {
+      console.error('Failed to save artwork:', err);
+      const errMsg = err.response?.data?.message || 'Failed to save artwork. Please try again.';
+      showFeedback('error', errMsg, 6000);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   // ── regionProps helper ───────────────────────────────────────────────────────
-  /**
-   * Returns all JSX props for a colorable SVG region element.
-   * Passed down to each SVG component so regions are interactive.
-   */
   const regionProps = (regionId) => ({
     id: regionId,
     className: `region${activeTool === 'eraser' ? ' region--eraser' : ''}`,
@@ -202,12 +307,28 @@ const Studio = () => {
   return (
     <div className="studio-page">
 
-      {/* ── Header: back link + page title + meta ── */}
+      {/* ── Header: navigation + title + meta + editing badge ── */}
       <header className="studio-header">
-        <Link to="/browse" className="studio-back-link" aria-label="Back to Browse">
-          ← Browse
-        </Link>
-        <h1 className="studio-title">{page.title}</h1>
+        <div className="studio-header-nav">
+          <Link to="/browse" className="studio-back-link" aria-label="Back to Browse">
+            ← Browse
+          </Link>
+          {user && (
+            <Link to="/gallery" className="studio-gallery-link" aria-label="Go to My Gallery">
+              🖼️ My Gallery
+            </Link>
+          )}
+        </div>
+
+        <div className="studio-title-group">
+          <h1 className="studio-title">{page.title}</h1>
+          {currentArtworkId && (
+            <span className="studio-saved-badge" title="You are editing an existing saved artwork">
+              Saved Artwork
+            </span>
+          )}
+        </div>
+
         <div className="studio-page-meta">
           <span className="studio-category-label">{page.category}</span>
           <span className={`studio-difficulty-badge studio-difficulty-badge--${page.difficulty.toLowerCase()}`}>
@@ -215,6 +336,14 @@ const Studio = () => {
           </span>
         </div>
       </header>
+
+      {/* ── Saved artwork load error alert ── */}
+      {loadError && (
+        <div className="studio-alert studio-alert--error" role="alert">
+          <span>⚠️ {loadError}</span>
+          <Link to="/gallery" className="studio-alert-link">Return to Gallery</Link>
+        </div>
+      )}
 
       {/* ── Main body: toolbar + workspace ── */}
       <div className="studio-body">
@@ -332,22 +461,77 @@ const Studio = () => {
             <span className="tool-icon">🔄</span>
             Reset all
           </button>
+
+          <hr className="toolbar-divider" />
+
+          {/* ── Phase 6: Save Artwork Section ── */}
+          <div className="tool-section studio-save-section">
+            <span className="tool-section-label">💾 Save artwork</span>
+
+            <div className="artwork-title-field">
+              <label htmlFor="artwork-title-input" className="artwork-title-label">
+                Artwork Name
+              </label>
+              <input
+                id="artwork-title-input"
+                type="text"
+                className="artwork-title-input"
+                value={artworkTitle}
+                onChange={(e) => setArtworkTitle(e.target.value)}
+                placeholder="Name your artwork"
+                maxLength={40}
+              />
+            </div>
+
+            <button
+              id="tool-save"
+              className="tool-btn tool-btn--save"
+              onClick={handleSave}
+              disabled={isSaving || isLoadingArtwork}
+              title={currentArtworkId ? 'Update this artwork' : 'Save artwork to Gallery'}
+              aria-label={currentArtworkId ? 'Update artwork' : 'Save artwork'}
+            >
+              <span className="tool-icon">{isSaving ? '⏳' : '💾'}</span>
+              {isSaving ? 'Saving...' : currentArtworkId ? 'Update Artwork' : 'Save Artwork'}
+            </button>
+
+            {/* Save Feedback Banner */}
+            {saveFeedback && (
+              <div
+                className={`studio-feedback studio-feedback--${saveFeedback.type}`}
+                role="status"
+                aria-live="polite"
+              >
+                {saveFeedback.message}
+              </div>
+            )}
+
+            {/* Hint for unauthenticated users */}
+            {!user && (
+              <p className="studio-login-hint">
+                <Link to="/login" className="studio-login-link">Log in</Link> to save to your personal Gallery.
+              </p>
+            )}
+          </div>
         </aside>
 
         {/* ══════════════════════════════════════════
             Central workspace — dynamic SVG component
             ══════════════════════════════════════════ */}
         <section className="studio-workspace" aria-label="Coloring workspace">
-          <span className="studio-canvas-label">Canvas</span>
+          <span className="studio-canvas-label">
+            {isLoadingArtwork ? 'Loading artwork...' : 'Canvas'}
+          </span>
 
           <div className="studio-svg-wrapper">
-            {/*
-             * SvgComponent is one of: CatSvg | FlowerSvg | RocketSvg | DragonSvg
-             * It receives regionProps — the function that attaches fill state,
-             * click handlers, and keyboard handlers to each SVG region element.
-             * No SVG markup lives in Studio.jsx itself.
-             */}
-            {SvgComponent && <SvgComponent regionProps={regionProps} />}
+            {isLoadingArtwork ? (
+              <div className="studio-canvas-loading">
+                <div className="studio-spinner" aria-hidden="true" />
+                <p>Loading your saved artwork...</p>
+              </div>
+            ) : (
+              SvgComponent && <SvgComponent regionProps={regionProps} />
+            )}
           </div>
         </section>
 

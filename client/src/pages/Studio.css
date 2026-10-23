@@ -21,6 +21,74 @@
   flex-wrap: wrap;
 }
 
+.studio-header-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.studio-gallery-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  color: #3b5bdb;
+  text-decoration: none;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid #c7d2fe;
+  border-radius: 6px;
+  background: #eef2ff;
+  font-weight: 500;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+  white-space: nowrap;
+}
+
+.studio-gallery-link:hover {
+  background: #e0e7ff;
+  border-color: #a5b4fc;
+}
+
+.studio-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.studio-saved-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+  padding: 0.2rem 0.55rem;
+  border-radius: 12px;
+  letter-spacing: 0.02em;
+}
+
+.studio-alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.88rem;
+}
+
+.studio-alert--error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.studio-alert-link {
+  color: #991b1b;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
 .studio-back-link {
   display: inline-flex;
   align-items: center;
@@ -359,6 +427,126 @@
 
 .studio-svg-wrapper svg .region:hover {
   filter: brightness(0.9);
+}
+
+/* ── Save section in toolbar ── */
+.studio-save-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.artwork-title-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.artwork-title-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #718096;
+}
+
+.artwork-title-input {
+  width: 100%;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.85rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1e293b;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.artwork-title-input:focus {
+  border-color: #3b5bdb;
+  box-shadow: 0 0 0 2px rgba(59, 91, 219, 0.15);
+}
+
+.tool-btn--save {
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+  border: 1px solid #1d4ed8;
+  margin-top: 0.2rem;
+}
+
+.tool-btn--save:hover:not(:disabled) {
+  background: #1d4ed8;
+  color: #ffffff;
+  border-color: #1e40af;
+}
+
+.tool-btn--save:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ── Feedback alert in toolbar ── */
+.studio-feedback {
+  font-size: 0.78rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 6px;
+  line-height: 1.3;
+  animation: fadeIn 0.2s ease-in;
+}
+
+.studio-feedback--success {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.studio-feedback--error {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.studio-login-hint {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.studio-login-link {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* ── Canvas loading spinner ── */
+.studio-canvas-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.studio-spinner {
+  width: 38px;
+  height: 38px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #3b5bdb;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ── Responsive: stack toolbar below workspace on mobile ── */
