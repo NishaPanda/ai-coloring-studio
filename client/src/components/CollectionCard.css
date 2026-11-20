@@ -1,0 +1,170 @@
+/* ─── CollectionCard.css ───────────────────────────────────────────────────────
+   Curated Collection Card for Explore Worlds
+   ──────────────────────────────────────────────────────────────────────────── */
+
+.collection-card {
+  background: var(--surface-white);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease, border-color 0.28s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.collection-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--card-accent, var(--lav-400));
+}
+
+.collection-card--active {
+  border-color: var(--card-accent, var(--lav-500));
+  box-shadow: 0 8px 24px rgba(124, 92, 252, 0.18);
+}
+
+/* ── Banner ── */
+.collection-card-banner {
+  height: 90px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.collection-card-banner::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.3) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.collection-card-icon {
+  font-size: 2.2rem;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
+  z-index: 1;
+}
+
+.collection-card-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 1;
+}
+
+.collection-card-badge {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-main);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-xs);
+  letter-spacing: 0.03em;
+}
+
+.collection-card-active-pill {
+  background: var(--text-main);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ── Body ── */
+.collection-card-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  flex: 1;
+}
+
+.collection-card-heading-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.collection-card-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.collection-card-subtitle {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--lav-600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.collection-card-description {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+  flex: 1;
+}
+
+/* ── Footer ── */
+.collection-card-footer {
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--border-subtle);
+  margin-top: auto;
+}
+
+.collection-card-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border-medium);
+  background: var(--lav-50);
+  color: var(--lav-800);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.collection-card-btn:hover {
+  background: var(--grad-primary);
+  color: #ffffff;
+  border-color: transparent;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(124, 92, 252, 0.25);
+}
+
+.collection-card--active .collection-card-btn {
+  background: var(--grad-primary);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.collection-card-btn-arrow {
+  transition: transform 0.2s ease;
+}
+
+.collection-card-btn:hover .collection-card-btn-arrow {
+  transform: translateX(4px);
+}
